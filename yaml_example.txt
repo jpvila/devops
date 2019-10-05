@@ -1,0 +1,78 @@
+apiVersion: build.openshift.io/v1
+kind: Build
+metadata:
+  annotations:
+    openshift.io/build-config.name: springbootcondb-pipeline
+    openshift.io/build.number: '2'
+  creationTimestamp: '2019-10-04T16:06:50Z'
+  labels:
+    app: springbootcondb
+    buildconfig: springbootcondb-pipeline
+    openshift.io/build-config.name: springbootcondb-pipeline
+    openshift.io/build.start-policy: Serial
+  name: springbootcondb-pipeline-2
+  namespace: lim-limitedecredito-dev
+  ownerReferences:
+    - apiVersion: build.openshift.io/v1
+      controller: true
+      kind: BuildConfig
+      name: springbootcondb-pipeline
+      uid: 97485506-e6bb-11e9-aee2-005056b01184
+  resourceVersion: '74249134'
+  selfLink: >-
+    /apis/build.openshift.io/v1/namespaces/lim-limitedecredito-dev/builds/springbootcondb-pipeline-2
+  uid: f978f9b7-e6c0-11e9-941b-005056b04e30
+spec:
+  nodeSelector: null
+  output: {}
+  postCommit: {}
+  resources: {}
+  serviceAccount: builder
+  source:
+    contextDir: clusters/no-prod/pipelines/branch
+    git:
+      ref: master
+      uri: 'ssh://git@stash.personal.corp:7999/op/openshift-pipelines.git'
+    sourceSecret:
+      name: repository-credentials
+    type: Git
+  strategy:
+    jenkinsPipelineStrategy:
+      env:
+        - name: APP
+          value: springbootcondb
+        - name: IMAGE
+          value: springbootcondb
+        - name: GIT_REPO
+          value: 'git@github.com:jpvila/springbootcondb.git'
+        - name: GIT_BRANCH
+          value: master
+        - name: ARTIFACTS_DIR
+          value: ./target
+        - name: JENKINS_AGENT
+          value: maven
+        - name: COMPILE_COMMANDS
+          value: >-
+            keytool -J-Djava.net.useSystemProxies=true -printcert -rfc
+            -sslserver artifactory.personal.corp:443 > artifactory.pem &&
+            keytool -noprompt -importcert -file artifactory.pem -alias
+            artifactory-cert -storepass changeit -keystore artifactory.jks &&
+            mvn -B clean package -e -DskipTests
+            -Djavax.net.ssl.trustStore=artifactory.jks
+            -Djavax.net.ssl.trustStorePassword=changeit --settings settings.xml
+        - name: TEST_COMMANDS
+          value: none
+        - name: CODE_ANALYSIS_COMMANDS
+          value: none
+        - name: REPOSITORY_CREDENTIALS
+          value: repository-credentials
+    type: JenkinsPipeline
+  triggeredBy:
+    - message: Manually triggered
+status:
+  config:
+    kind: BuildConfig
+    name: springbootcondb-pipeline
+    namespace: lim-limitedecredito-dev
+  output: {}
+  phase: New
